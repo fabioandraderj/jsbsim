@@ -144,7 +144,8 @@ bool FGWinds::Run(bool Holding)
   if (turbType != ttNone) Turbulence(in.AltitudeASL);
   if (oneMinusCosineGust.gustProfile.Running) CosineGust();
 
-  vTotalWindNED = vWindNED + vGustNED + vCosineGust + vTurbulenceNED;
+  //vTotalWindNED = vWindNED + vGustNED + vCosineGust + vTurbulenceNED;
+  vTotalWindNED = vWindNED;
 
    // psiw (Wind heading) is the direction the wind is blowing towards
   if (vWindNED(eX) != 0.0) psiw = atan2( vWindNED(eY), vWindNED(eX) );
@@ -160,6 +161,15 @@ bool FGWinds::Run(bool Holding)
 
 void FGWinds::SetWindspeed(double speed)
 {
+
+  float wn = 5.0;
+  float we = 5.0;
+
+  vWindNED(eNorth) = wn;
+  vWindNED(eEast) = we;
+  vWindNED(eDown) = 0;
+
+  /*
   if (vWindNED.Magnitude() == 0.0) {
     psiw = 0.0;
     vWindNED(eNorth) = speed;
@@ -168,6 +178,7 @@ void FGWinds::SetWindspeed(double speed)
     vWindNED(eEast) = speed * sin(psiw);
     vWindNED(eDown) = 0.0;
   }
+  */
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
