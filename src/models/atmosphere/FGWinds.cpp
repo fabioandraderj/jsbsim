@@ -167,12 +167,12 @@ bool FGWinds::Run(bool Holding)
 void FGWinds::SetWindspeed(double speed)
 {
 
-  double length = get_length(1.050590253612108, 0.087628758356184,Propagate->GetLatitudeDeg(),Propagate->GetLongitude());
-  double azimuth = get_azimuth(1.050590253612108, 0.087628758356184,Propagate->GetLatitudeDeg(),Propagate->GetLongitude());
+  double length = get_length(1.050590253612108, 0.087628758356184,Propagate->GetLatitude(),Propagate->GetLongitude());
+  double azimuth = get_azimuth(1.050590253612108, 0.087628758356184,Propagate->GetLatitude(),Propagate->GetLongitude());
 
   azimuth = azimuth + 0.154985205;
 
-  printf("%f %f %f %f\n",Propagate->GetLatitude(),Propagate->GetLongitude(),length,azimuth);
+  //printf("%f %f %f %f\n",Propagate->GetLatitude(),Propagate->GetLongitude(),length,azimuth);
   
   int row_idx = round(length*sin(azimuth)/2.5);
   int col_idx = round(length*cos(azimuth)/2.5);
