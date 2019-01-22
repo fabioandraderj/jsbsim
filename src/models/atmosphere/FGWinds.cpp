@@ -46,6 +46,7 @@ INCLUDES
 #include <cstdlib>
 #include "FGWinds.h"
 #include "FGFDMExec.h"
+#include <fstream> //included by Fabio
 
 using namespace std;
 
@@ -73,6 +74,7 @@ static inline double sqr(double x) { return x*x; }
 
 FGWinds::FGWinds(FGFDMExec* fdmex) : FGModel(fdmex)
 {
+  Propagate = fdmex->GetPropagate(); //added by Fabio
   Name = "FGWinds";
 
   MagnitudedAccelDt = MagnitudeAccel = Magnitude = TurbDirection = 0.0;
@@ -122,6 +124,9 @@ bool FGWinds::InitModel(void)
 {
   if (!FGModel::InitModel()) return false;
 
+  loadxwind(); //added by Fabio
+  loadywind(); //added by Fabio
+
   psiw = 0.0;
 
   vGustNED.InitMatrix();
@@ -162,12 +167,25 @@ bool FGWinds::Run(bool Holding)
 void FGWinds::SetWindspeed(double speed)
 {
 
-  float wn = 5.0;
-  float we = 5.0;
+  double length = get_length(1.050590253612108, 0.087628758356184,Propagate->GetLatitudeDeg(),Propagate->GetLongitude());
+  double azimuth = get_azimuth(1.050590253612108, 0.087628758356184,Propagate->GetLatitudeDeg(),Propagate->GetLongitude());
+
+  azimuth = azimuth + 0.154985205;
+
+  printf("%f %f %f %f\n",Propagate->GetLatitude(),Propagate->GetLongitude(),length,azimuth);
+  
+  int row_idx = round(length*sin(azimuth)/2.5);
+  int col_idx = round(length*cos(azimuth)/2.5);
+  double wn = x[row_idx][col_idx];
+  double we = y[row_idx][col_idx];
+
+  //float wn = 5.0;
+  //float we = 5.0;
+  
 
   vWindNED(eNorth) = wn;
   vWindNED(eEast) = we;
-  vWindNED(eDown) = 0;
+  vWindNED(eDown) = 0.0;
 
   /*
   if (vWindNED.Magnitude() == 0.0) {
@@ -621,4 +639,63 @@ void FGWinds::Debug(int from)
   }
 }
 
+//Functions added by Fabio 
+double FGWinds::get_length(double lat1Rad, double lon1Rad, double lat2Rad, double lon2Rad)
+{
+    double earthDiameterMeters = 2*6371;
+    double x = sin((lat2Rad - lat1Rad) / 2);
+    double y = sin((lon2Rad - lon1Rad) / 2);
+    return earthDiameterMeters * asin(sqrt(x*x + y*y*cos(lat1Rad)*cos(lat2Rad)));
+}
+
+double FGWinds::get_azimuth(double lat1Rad, double lon1Rad, double lat2Rad, double lon2Rad)
+{
+    double x = cos(lat1Rad)*sin(lat2Rad) - sin(lat1Rad)*cos(lat2Rad)*cos(lon2Rad - lon1Rad);
+    double y = sin(lon2Rad - lon1Rad) * cos(lat2Rad);
+    return atan2(y, x);
+}
+
+void FGWinds::loadxwind() {
+  int row, col;
+  const int rows = 35;
+  const int cols = 60;
+  ifstream in("/home/fabio/jsbsim/src/models/atmosphere/xwind.txt");
+
+  if (in.is_open()) {
+    std::cout << "File x opened";
+  }
+  else {
+    std::cout << "Error opening file x";
+  }
+
+  for (row = 0; row < rows; row++) {
+    for (col = 0; col < cols; col++) {
+      in >> x[row][col];
+      //printf("%f\n",x[row][col]);
+    }
+  }
+  in.close();
+}
+
+void FGWinds::loadywind() {
+  int row, col;
+  const int rows = 35;
+  const int cols = 60;
+  ifstream in("/home/fabio/jsbsim/src/models/atmosphere/ywind.txt");
+  
+  if (in.is_open()) {
+    std::cout << "File y opened";
+  }
+  else {
+    std::cout << "Error opening file y";
+  }
+
+  for (row = 0; row < rows; row++) {
+    for (col = 0; col < cols; col++) {
+      in >> y[row][col];
+      //printf("%f\n",y[row][col]);
+    }
+  }
+  in.close();
+}
 } // namespace JSBSim

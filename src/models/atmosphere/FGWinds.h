@@ -109,7 +109,7 @@ CLASS DOCUMENTATION
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
+class FGPropagate; //added by Fabio
 class FGWinds : public FGModel {
 public:
 
@@ -349,6 +349,15 @@ private:
 
   virtual void bind(void);
   void Debug(int from);
+  
+  //Added by Fabio for loading external wind maps
+  FGPropagate* Propagate;
+  double x[35][60];
+  double y[35][60];
+  double get_length(double lat1Rad, double lon1Rad, double lat2Rad, double lon2Rad);
+  double get_azimuth(double lat1Rad, double lon1Rad, double lat2Rad, double lon2Rad);
+  void loadxwind();
+  void loadywind();
 };
 
 } // namespace JSBSim
